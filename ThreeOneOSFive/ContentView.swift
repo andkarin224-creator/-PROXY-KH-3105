@@ -2,6 +2,7 @@ import SwiftUI
 import UIKit
 
 struct ContentView: View {
+        @State private var showProxyKH = true
     @Environment(\.appLanguage) private var language
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @EnvironmentObject private var patchDraftCoordinator: PatchDraftCoordinator
@@ -42,6 +43,10 @@ struct ContentView: View {
     }
 
     var body: some View {
+    if showProxyKH {
+        ProxyKHPanelView()
+    } else {
+        Group {
         Group {
             if horizontalSizeClass == .regular {
                 regularLayout
