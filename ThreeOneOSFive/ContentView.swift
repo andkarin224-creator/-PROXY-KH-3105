@@ -73,7 +73,7 @@ struct ContentView: View {
         .patchStorePresentation(patchStore)
         .repositoryStorePresentation(repositoryStore, patchStore: patchStore)
     }
-
+}    
     private var compactLayout: some View {
         TabView(selection: tabSelection) {
             ForEach(featureVisibility.visibleSections) { section in
