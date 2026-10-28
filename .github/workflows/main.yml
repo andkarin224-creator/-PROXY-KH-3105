@@ -1,0 +1,52 @@
+
+name: Build iOS App
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "ThreeOneOSFive/**"
+      - "ThreeOneOSFive.xcodeproj/**"
+      - ".github/workflows/main.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Download source
+        uses: actions/checkout@v4
+
+      - name: Show Xcode project settings
+        run: xcodebuild -list -project ThreeOneOSFive.xcodeproj
+
+      - name: Build unsigned iOS app
+        run: |
+          xcodebuild \
+            -project ThreeOneOSFive.xcodeproj \
+            -scheme 3105 \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package unsigned IPA
+        run: |
+          APP_PATH="build/DerivedData/Build/Products/Release-iphoneos/ThreeOneOSFive.app"
+          test -d "$APP_PATH"
+          mkdir -p build/Payload
+          cp -R "$APP_PATH" build/Payload/
+          cd build
+          zip -r 3105-unsigned.ipa Payload
+
+      - name: Save build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: 3105-unsigned-ipa
+          path: build/3105-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 7
