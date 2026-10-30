@@ -59,17 +59,20 @@ struct SettingsView: View {
                 }
 
                 // LANGUAGE
-                Section("ภาษา") {
+                Section {
                     Picker("ภาษา", selection: $languageCode) {
                         ForEach(AppLanguage.allCases) { option in
-                            Text(option.displayName).tag(option.rawValue)
+                            Text(option.displayName)
+                                .tag(option.rawValue)
                         }
                     }
                     .pickerStyle(.segmented)
+                } header: {
+                    Text("ภาษา")
                 }
 
                 // FEATURES
-                Section("ฟังก์ชัน") {
+                Section {
                     Toggle(isOn: $cleanerEnabled) {
                         Label(
                             language.text("tab.cleaner"),
@@ -83,6 +86,8 @@ struct SettingsView: View {
                             systemImage: "hammer.fill"
                         )
                     }
+                } header: {
+                    Text("ฟังก์ชัน")
                 } footer: {
                     Text(language.text("settings.developer_mode_footer"))
                 }
@@ -91,7 +96,7 @@ struct SettingsView: View {
                 if WallpaperFeatureSupportPolicy.isSupported(
                     major: AppInfo.versionTuple.major
                 ) {
-                    Section("วอลเปเปอร์") {
+                    Section {
                         NavigationLink {
                             WallpaperResetSettingsView()
                         } label: {
@@ -100,13 +105,15 @@ struct SettingsView: View {
                                 systemImage: "arrow.counterclockwise"
                             )
                         }
+                    } header: {
+                        Text("วอลเปเปอร์")
                     } footer: {
                         Text(language.text("wallpaper.reset_settings_footer"))
                     }
                 }
 
                 // DEVICE
-                Section("ข้อมูลอุปกรณ์") {
+                Section {
                     LabeledContent(
                         "รุ่นอุปกรณ์",
                         value: AppInfo.displayMachineName
@@ -124,10 +131,12 @@ struct SettingsView: View {
                     .foregroundStyle(
                         appState.isSupported ? Color.green : Color.red
                     )
+                } header: {
+                    Text("ข้อมูลอุปกรณ์")
                 }
 
                 // VERIFIED IOS
-                Section("เวอร์ชัน iOS ที่ตรวจสอบแล้ว") {
+                Section {
                     LabeledContent(
                         "iOS 17",
                         value: ExploitSupportPolicy.verifiedIOS17Range
@@ -157,6 +166,8 @@ struct SettingsView: View {
                         }
                     }
                     .padding(.vertical, 4)
+                } header: {
+                    Text("เวอร์ชัน iOS ที่ตรวจสอบแล้ว")
                 } footer: {
                     Text(
                         language.text(
@@ -166,7 +177,7 @@ struct SettingsView: View {
                 }
 
                 // ABOUT
-                Section("เกี่ยวกับแอป") {
+                Section {
                     LabeledContent(
                         "ชื่อแอป",
                         value: "KHEWIN STORE"
@@ -180,10 +191,12 @@ struct SettingsView: View {
                     Text("KH STORE PREMIUM CONTROL")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                } header: {
+                    Text("เกี่ยวกับแอป")
                 }
 
                 // SOCIAL MEDIA
-                Section(language.text("settings.social_media")) {
+                Section {
                     creditsRow(
                         name: "GitHub",
                         role: language.text("social.github_role"),
@@ -195,10 +208,12 @@ struct SettingsView: View {
                         role: language.text("social.iosvn_role"),
                         url: "https://t.me/ioscrackvn"
                     )
+                } header: {
+                    Text(language.text("settings.social_media"))
                 }
 
                 // CREDITS
-                Section(language.text("settings.credits")) {
+                Section {
                     creditsRow(
                         name: "YangJiii",
                         role: language.text("credit.yangjiii"),
@@ -228,6 +243,8 @@ struct SettingsView: View {
                         role: language.text("credit.forcequit"),
                         url: "https://github.com/forcequitOS"
                     )
+                } header: {
+                    Text(language.text("settings.credits"))
                 }
 
                 // FOOTER
