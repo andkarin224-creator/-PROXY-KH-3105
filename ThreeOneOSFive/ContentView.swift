@@ -248,141 +248,314 @@ private extension AppSection {
     }
 }
 
-// MARK: - PROXY KH Panel
 
 struct ProxyKHPanelView: View {
-    @State private var selectedTab = 0
+    @State private var selectedGame = "FFTH"
+    @State private var filesEnabled = true
+    @State private var patchEnabled = true
+    @State private var statusEnabled = true
+    @State private var showSettings = false
     @State private var filesTabSession = FilesTabSession()
 
+    private let blue = Color(red: 0.05, green: 0.75, blue: 0.95)
+
     var body: some View {
-        ZStack {
-            Color.black
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                Color(red: 0.015, green: 0.035, blue: 0.055)
+                    .ignoresSafeArea()
 
-            TabView(selection: $selectedTab) {
-                homeView
-                    .tabItem {
-                        Label("HOME", systemImage: "house.fill")
+                ScrollView {
+                    VStack(spacing: 22) {
+
+                        // HEADER
+                        VStack(spacing: 10) {
+                            Image(systemName: "shield.lefthalf.filled")
+                                .font(.system(size: 48))
+                                .foregroundStyle(blue)
+
+                            Text("KHEWIN STORE • READY")
+                                .font(.system(size: 25, weight: .black))
+                                .foregroundStyle(.white)
+                                .multilineTextAlignment(.center)
+
+                            Text("SYSTEM MODZ")
+                                .font(.system(size: 12, weight: .bold))
+                                .tracking(4)
+                                .foregroundStyle(blue)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 25)
+
+                        // STATUS
+                        HStack {
+                            Circle()
+                                .fill(.green)
+                                .frame(width: 9, height: 9)
+
+                            Text("SECURE / KHSTORE // CORE / ONLINE")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                        }
+                        .padding(15)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.white.opacity(0.06))
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+
+                        // KEY STATUS
+                        VStack(alignment: .leading, spacing: 9) {
+                            Text("เวลาคีย์คงเหลือ")
+                                .font(.headline)
+                                .foregroundStyle(.white)
+
+                            Text("(อยู่ในช่วง ปรับปรุงแอพ)")
+                                .font(.subheadline)
+                                .foregroundStyle(.gray)
+
+                            Text("ACTIVE")
+                                .font(.caption.bold())
+                                .foregroundStyle(blue)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(18)
+                        .background(Color.white.opacity(0.06))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(blue.opacity(0.35), lineWidth: 1)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 18))
+
+                        // GAME SELECTION
+                        sectionTitle("เลือกเกม", subtitle: "เลือกเกมเพื่อจัดการไฟล์")
+
+                        HStack(spacing: 12) {
+                            gameButton("FFTH", subtitle: "FREE FIRE")
+                            gameButton("FFMAX", subtitle: "FREE FIRE MAX")
+                        }
+
+                        // FUNCTIONS
+                        sectionTitle(
+                            "FUNCTIONS",
+                            subtitle: "เปิดหรือปิดฟังก์ชันที่ต้องการ"
+                        )
+
+                        VStack(spacing: 12) {
+                            functionToggle(
+                                title: "FILE MANAGEMENT",
+                                subtitle: "เปิดหรือปิดการเข้าถึงระบบจัดการไฟล์",
+                                icon: "folder.fill",
+                                isOn: $filesEnabled
+                            )
+
+                            functionToggle(
+                                title: "PATCH PROJECTS",
+                                subtitle: "เปิดหรือปิดการเข้าถึงระบบ Patch",
+                                icon: "wrench.and.screwdriver.fill",
+                                isOn: $patchEnabled
+                            )
+
+                            functionToggle(
+                                title: "SYSTEM STATUS",
+                                subtitle: "แสดงสถานะระบบบนหน้า HOME",
+                                icon: "chart.bar.fill",
+                                isOn: $statusEnabled
+                            )
+                        }
+
+                        // OLD SYSTEM ACCESS
+                        sectionTitle("SYSTEM TOOLS", subtitle: "เครื่องมือเดิมของแอป")
+
+                        if filesEnabled {
+                            NavigationLink {
+                                AppDataBrowserView(
+                                    tabSession: $filesTabSession
+                                )
+                            } label: {
+                                toolButton("FILES", icon: "folder.fill")
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        if patchEnabled {
+                            NavigationLink {
+                                PatchProjectsView()
+                            } label: {
+                                toolButton("PATCH PROJECTS", icon: "wrench.and.screwdriver.fill")
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        if statusEnabled {
+                            Text("KHSTORE CORE • ONLINE")
+                                .font(.caption.bold())
+                                .tracking(2)
+                                .foregroundStyle(blue)
+                                .padding(.vertical, 15)
+                        }
                     }
-                    .tag(0)
-
-                AppDataBrowserView(
-                    tabSession: $filesTabSession
-                )
-                .tabItem {
-                    Label("FILES", systemImage: "folder.fill")
+                    .padding(20)
                 }
-                .tag(1)
-
-                PatchProjectsView()
-                    .tabItem {
-                        Label("PATCH", systemImage: "wrench.and.screwdriver.fill")
-                    }
-                    .tag(2)
-
-                SettingsView()
-                    .tabItem {
-                        Label("SETTINGS", systemImage: "gearshape.fill")
-                    }
-                    .tag(3)
             }
-            .tint(.red)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("KH STORE")
+                        .font(.headline.bold())
+                        .foregroundStyle(.white)
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape.fill")
+                            .font(.title3)
+                            .foregroundStyle(blue)
+                    }
+                }
+            }
+            .toolbarBackground(
+                Color(red: 0.015, green: 0.035, blue: 0.055),
+                for: .navigationBar
+            )
+            .toolbarBackground(.visible, for: .navigationBar)
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+            }
         }
+        .tint(blue)
         .preferredColorScheme(.dark)
     }
 
-    private var homeView: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 18) {
-                    Image(systemName: "shield.fill")
-                        .font(.system(size: 58))
-                        .foregroundStyle(.red)
+    // MARK: - GAME BUTTON
 
-                    Text("PROXY KH")
-                        .font(.system(size: 32, weight: .black))
-                        .foregroundStyle(.white)
+    private func gameButton(
+        _ game: String,
+        subtitle: String
+    ) -> some View {
+        let selected = selectedGame == game
 
-                    Text("3105 SYSTEM")
-                        .font(.headline)
-                        .foregroundStyle(.gray)
+        return Button {
+            selectedGame = game
+        } label: {
+            VStack(spacing: 10) {
+                Image(systemName: "gamecontroller.fill")
+                    .font(.system(size: 30))
+                    .foregroundStyle(selected ? blue : .gray)
 
-                    Text("FILE MANAGEMENT • PATCH • SETTINGS")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.red)
+                Text(game)
+                    .font(.headline.bold())
+                    .foregroundStyle(.white)
 
-                    VStack(spacing: 12) {
-                        panelButton(
-                            title: "APP DATA",
-                            subtitle: "จัดการไฟล์และข้อมูลแอป",
-                            icon: "folder.fill"
-                        ) {
-                            selectedTab = 1
-                        }
+                Text(subtitle)
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(.gray)
 
-                        panelButton(
-                            title: "PATCH PROJECTS",
-                            subtitle: "จัดการโปรเจกต์ Patch ของ 3105",
-                            icon: "wrench.and.screwdriver.fill"
-                        ) {
-                            selectedTab = 2
-                        }
-
-                        panelButton(
-                            title: "SETTINGS",
-                            subtitle: "ตั้งค่าระบบ 3105",
-                            icon: "gearshape.fill"
-                        ) {
-                            selectedTab = 3
-                        }
-                    }
-                    .padding(.top, 10)
-                }
-                .padding(20)
+                Text(selected ? "SELECTED" : "SELECT")
+                    .font(.caption.bold())
+                    .foregroundStyle(selected ? blue : .gray)
             }
-            .navigationTitle("PROXY KH")
-            .navigationBarTitleDisplayMode(.inline)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 18)
+            .background(Color.white.opacity(0.055))
+            .overlay(
+                RoundedRectangle(cornerRadius: 17)
+                    .stroke(
+                        selected ? blue : Color.white.opacity(0.12),
+                        lineWidth: selected ? 2 : 1
+                    )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 17))
         }
+        .buttonStyle(.plain)
     }
 
-    private func panelButton(
+    // MARK: - FUNCTION SWITCH
+
+    private func functionToggle(
         title: String,
         subtitle: String,
         icon: String,
-        action: @escaping () -> Void
+        isOn: Binding<Bool>
     ) -> some View {
-        Button(action: action) {
-            HStack(spacing: 14) {
-                Image(systemName: icon)
-                    .font(.title2)
-                    .foregroundStyle(.red)
-                    .frame(width: 42)
+        HStack(spacing: 13) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundStyle(blue)
+                .frame(width: 35)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.headline)
-                        .foregroundStyle(.white)
+            VStack(alignment: .leading, spacing: 5) {
+                Text(title)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(.white)
 
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundStyle(.gray)
-                }
-
-                Spacer()
-
-                Image(systemName: "chevron.right")
+                Text(subtitle)
+                    .font(.system(size: 10))
                     .foregroundStyle(.gray)
             }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white.opacity(0.07))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.red.opacity(0.35), lineWidth: 1)
-            )
+
+            Spacer()
+
+            Toggle("", isOn: isOn)
+                .labelsHidden()
+                .tint(blue)
         }
-        .buttonStyle(.plain)
+        .padding(15)
+        .background(Color.white.opacity(0.055))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(blue.opacity(0.25), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    // MARK: - SECTION TITLE
+
+    private func sectionTitle(
+        _ title: String,
+        subtitle: String
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack {
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(blue)
+                    .frame(width: 4, height: 24)
+
+                Text(title)
+                    .font(.headline.bold())
+                    .foregroundStyle(.white)
+
+                Spacer()
+            }
+
+            Text(subtitle)
+                .font(.caption)
+                .foregroundStyle(.gray)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - TOOL BUTTON
+
+    private func toolButton(
+        _ title: String,
+        icon: String
+    ) -> some View {
+        HStack(spacing: 13) {
+            Image(systemName: icon)
+                .foregroundStyle(blue)
+
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(.white)
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .foregroundStyle(.gray)
+        }
+        .padding(17)
+        .background(Color.white.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 15))
     }
 }
