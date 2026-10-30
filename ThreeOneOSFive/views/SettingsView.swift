@@ -1,61 +1,97 @@
+
 import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appLanguage) private var language
     @EnvironmentObject private var appState: AppState
-    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.english.rawValue
-    @AppStorage(FeatureVisibility.cleanerStorageKey) private var cleanerEnabled = true
+
+    @AppStorage(AppLanguage.storageKey)
+    private var languageCode = AppLanguage.english.rawValue
+
+    @AppStorage(FeatureVisibility.cleanerStorageKey)
+    private var cleanerEnabled = true
+
     @AppStorage(FeatureVisibility.developerModeStorageKey)
     private var developerModeEnabled = false
 
     var body: some View {
         NavigationStack {
             Form {
+                // HEADER
                 Section {
                     HStack(spacing: 14) {
                         AppLogo()
 
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("3105").font(.headline)
-                            Text(language.text("common.version", appVersion))
-                                .font(.subheadline)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("KHEWIN STORE")
+                                .font(.headline)
+
+                            Text("ONLINE • Version 1.1.5")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+                    }
+                    .padding(.vertical, 6)
+                }
+
+                // TRIAL MEMBER
+                Section {
+                    HStack(spacing: 12) {
+                        Image(systemName: "hourglass")
+                            .font(.title2)
+                            .foregroundStyle(.orange)
+
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text("ทดลองใช้งาน")
+                                .font(.headline)
+
+                            Text("ขณะนี้เป็นตัวทดลองใช้งาน ยังไม่เชื่อมต่อ License")
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 6)
+                } header: {
+                    Text("สมาชิก KH STORE")
                 }
 
-                Section(language.text("settings.language")) {
-                    Picker(language.text("settings.language"), selection: $languageCode) {
+                // LANGUAGE
+                Section("ภาษา") {
+                    Picker("ภาษา", selection: $languageCode) {
                         ForEach(AppLanguage.allCases) { option in
                             Text(option.displayName).tag(option.rawValue)
                         }
                     }
                     .pickerStyle(.segmented)
-                    .labelsHidden()
                 }
 
-                Section {
+                // FEATURES
+                Section("ฟังก์ชัน") {
                     Toggle(isOn: $cleanerEnabled) {
-                        Label(language.text("tab.cleaner"), systemImage: "sparkles")
+                        Label(
+                            language.text("tab.cleaner"),
+                            systemImage: "sparkles"
+                        )
                     }
+
                     Toggle(isOn: $developerModeEnabled) {
                         Label(
                             language.text("settings.developer_mode"),
                             systemImage: "hammer.fill"
                         )
                     }
-                } header: {
-                    Text(language.text("dashboard.features"))
                 } footer: {
                     Text(language.text("settings.developer_mode_footer"))
                 }
 
+                // WALLPAPER
                 if WallpaperFeatureSupportPolicy.isSupported(
                     major: AppInfo.versionTuple.major
                 ) {
-                    Section {
+                    Section("วอลเปเปอร์") {
                         NavigationLink {
                             WallpaperResetSettingsView()
                         } label: {
@@ -64,50 +100,96 @@ struct SettingsView: View {
                                 systemImage: "arrow.counterclockwise"
                             )
                         }
-                    } header: {
-                        Text(language.text("tab.wallpapers"))
                     } footer: {
                         Text(language.text("wallpaper.reset_settings_footer"))
                     }
                 }
 
-                Section(language.text("common.device")) {
-                    LabeledContent(language.text("dashboard.hardware_model"), value: AppInfo.displayMachineName)
-                    LabeledContent(language.text("settings.ios_version"), value: "\(AppInfo.osVersion) (\(AppInfo.osBuild))")
+                // DEVICE
+                Section("ข้อมูลอุปกรณ์") {
+                    LabeledContent(
+                        "รุ่นอุปกรณ์",
+                        value: AppInfo.displayMachineName
+                    )
+
+                    LabeledContent(
+                        "เวอร์ชัน iOS",
+                        value: "\(AppInfo.osVersion) (\(AppInfo.osBuild))"
+                    )
+
+                    LabeledContent(
+                        "สถานะระบบ",
+                        value: appState.isSupported ? "รองรับ" : "ไม่รองรับ"
+                    )
+                    .foregroundStyle(
+                        appState.isSupported ? Color.green : Color.red
+                    )
                 }
 
-                Section {
-                    HStack {
-                        Text(language.text("settings.current_version"))
-                        Spacer()
-                        Text(language.text(appState.isSupported ? "settings.supported" : "settings.unsupported"))
-                        .foregroundStyle(appState.isSupported ? Color.green : Color.red)
-                    }
-                    LabeledContent("iOS 17", value: ExploitSupportPolicy.verifiedIOS17Range)
-                    LabeledContent("iOS 18", value: ExploitSupportPolicy.verifiedIOS18Range)
-                    LabeledContent("iOS 26", value: ExploitSupportPolicy.verifiedIOS26Range)
+                // VERIFIED IOS
+                Section("เวอร์ชัน iOS ที่ตรวจสอบแล้ว") {
+                    LabeledContent(
+                        "iOS 17",
+                        value: ExploitSupportPolicy.verifiedIOS17Range
+                    )
+
+                    LabeledContent(
+                        "iOS 18",
+                        value: ExploitSupportPolicy.verifiedIOS18Range
+                    )
+
+                    LabeledContent(
+                        "iOS 26",
+                        value: ExploitSupportPolicy.verifiedIOS26Range
+                    )
+
                     VStack(alignment: .leading, spacing: 8) {
                         Text("iOS 27.0")
                             .font(.body)
-                        ForEach(ExploitSupportPolicy.verifiedIOS27Builds, id: \.build) { version in
+
+                        ForEach(
+                            ExploitSupportPolicy.verifiedIOS27Builds,
+                            id: \.build
+                        ) { version in
                             Text(versionLabel(version))
-                            .font(.caption.monospaced())
-                            .foregroundStyle(.secondary)
+                                .font(.caption.monospaced())
+                                .foregroundStyle(.secondary)
                         }
                     }
-                    .padding(.vertical, 2)
-                } header: {
-                    Text(language.text("settings.verified_versions"))
+                    .padding(.vertical, 4)
                 } footer: {
-                    Text(language.text("settings.supported_versions_footer"))
+                    Text(
+                        language.text(
+                            "settings.supported_versions_footer"
+                        )
+                    )
                 }
 
+                // ABOUT
+                Section("เกี่ยวกับแอป") {
+                    LabeledContent(
+                        "ชื่อแอป",
+                        value: "KHEWIN STORE"
+                    )
+
+                    LabeledContent(
+                        "เวอร์ชัน",
+                        value: "1.1.5"
+                    )
+
+                    Text("KH STORE PREMIUM CONTROL")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                // SOCIAL MEDIA
                 Section(language.text("settings.social_media")) {
                     creditsRow(
                         name: "GitHub",
                         role: language.text("social.github_role"),
                         url: "https://github.com/YangJiiii/3105"
                     )
+
                     creditsRow(
                         name: "Cộng Đồng IOSVN",
                         role: language.text("social.iosvn_role"),
@@ -115,50 +197,66 @@ struct SettingsView: View {
                     )
                 }
 
+                // CREDITS
                 Section(language.text("settings.credits")) {
                     creditsRow(
                         name: "YangJiii",
                         role: language.text("credit.yangjiii"),
                         url: "https://x.com/duongduong0908"
                     )
+
                     creditsRow(
                         name: "0xjohnnydev",
                         role: language.text("credit.filzaslop"),
                         url: "https://github.com/0xjohnnydev/FilzaSlop"
                     )
+
                     creditsRow(
                         name: "LeminLimez",
                         role: language.text("credit.pocket_poster"),
                         url: "https://github.com/leminlimez/Pocket-Poster"
                     )
+
                     creditsRow(
                         name: "CrazyMind90",
                         role: language.text("credit.sandbox_escape"),
                         url: "https://github.com/CrazyMind90"
                     )
+
                     creditsRow(
                         name: "forcequitOS",
                         role: language.text("credit.forcequit"),
                         url: "https://github.com/forcequitOS"
                     )
                 }
+
+                // FOOTER
+                Section {
+                    VStack(spacing: 8) {
+                        Text("KH STORE")
+                            .font(.headline)
+                            .fontWeight(.bold)
+
+                        Text("PLAY A BETTER TOMORROW")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                }
             }
             .tint(AppTheme.accent)
-            .navigationTitle(language.text("settings.title"))
+            .navigationTitle("ตั้งค่า KH STORE")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(language.text("common.done")) { dismiss() }
-                        .fontWeight(.semibold)
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
                 }
             }
         }
-    }
-
-    private var appVersion: String {
-        Bundle.main.object(forInfoDictionaryKey: "AppReleaseDisplayVersion") as? String
-            ?? Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-            ?? "1.0"
     }
 
     private func versionLabel(
@@ -172,6 +270,7 @@ struct SettingsView: View {
                 version.build
             )
         }
+
         return language.text(
             "settings.developer_beta_build",
             Int64(version.beta),
@@ -180,7 +279,11 @@ struct SettingsView: View {
     }
 
     @ViewBuilder
-    private func creditsRow(name: String, role: String, url: String) -> some View {
+    private func creditsRow(
+        name: String,
+        role: String,
+        url: String
+    ) -> some View {
         if let destination = URL(string: url) {
             Link(destination: destination) {
                 HStack(spacing: 12) {
@@ -188,11 +291,14 @@ struct SettingsView: View {
                         Text(name)
                             .font(.headline)
                             .foregroundStyle(.primary)
+
                         Text(role)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+
                     Spacer()
+
                     Image(systemName: "arrow.up.right")
                         .font(.system(size: 14, weight: .medium))
                         .foregroundStyle(AppTheme.accent)
@@ -200,7 +306,9 @@ struct SettingsView: View {
                 }
                 .contentShape(Rectangle())
             }
-            .accessibilityLabel(language.text("accessibility.open_profile", name))
+            .accessibilityLabel(
+                language.text("accessibility.open_profile", name)
+            )
         }
     }
 }
